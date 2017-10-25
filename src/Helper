@@ -1,0 +1,180 @@
+Todo still:
+Pretty much good to go. Gloss over a few things before the demo
+
+up or down arrow pressed:
+if(notAlreadyPressed) //else do nothing
+	change light to yellow
+	add floor to FIFO upQueue or downQueue if not already in it
+	lookInQueue()
+
+pickUpAtFloor(destinationFloor, destinationPassengerDirection)
+		close doors if not already closed
+		find out direction
+		set currentDirection
+		change screen to currentDirection
+		inUse = true
+		moveToFloor(destinationFloor)	
+		
+
+//need to revise to change the priorities
+//priority: order (high to low)
+1) if direction is up: upQueue floors that are the same or higher
+	else: downQueue floors that are the same or lower
+2) if up: downQueue floors that are higher (change when we get there)
+	else: upQueue floors that are lower
+-switch direction-
+3) if was up: highest downQueue floor
+	else: lowest upQueue floor
+4) if was up: highest upQueue floor (have to change direction when we get there)
+	else: lowest downQueue floor
+	
+	
+lookInQueue()
+	if(inUse): return
+	if (currenDirection is up)
+		for all floors in upQueue that are >= currentFloor
+			if upQueue[i]
+				upQueue[i] = false
+				pickUpAtFloor(i, currentDirection)
+				return
+		for all floors in downQueue starting with the top
+			if downQueue[i]
+				downQueue[i] = false
+				pickUpAtFloor(i, currentDirection)
+				return
+		for all floors in upQueue starting with the top
+			if upQueue[i]
+				upQueue[i] = false
+				pickUpAtFloor(i, currentDirection)
+				return
+	else
+		for all floors in downQueue that are <= currentFloor
+			if downQueue[i]
+				downQueue[i] = false
+				pickUpAtFloor(i, currentDirection)
+				return
+		for all floors in upQueue starting with the bottom
+			if upQueue[i]
+				upQueue[i] = false
+				pickUpAtFloor(i, currentDirection)
+				return
+		for all floors in downQueue starting with the bottom
+			if downQueue[i]
+				downQueue[i] = false
+				pickUpAtFloor(i, currentDirection)
+				return
+	inUse = false;
+	change direction to nothing
+
+
+revised actionEvent()
+//both of these changes will take place twice (once for each timer called)
+
+	//every time we reach a floor (even if its the destination floor):
+	for every int passenger in currentDirection queue
+		if passenger == currentFloor
+			remove passenger from queue
+			openDoors
+			stop travelUp/travelDown timer
+			if floorButton[floor] is lit up
+				set button color back to normal
+			if arrowButton[floor] of the direction we're traveling is lit up
+				set button color back to normal
+			call dropOffOrPickUpTimer //5 seconds
+				
+	//once arrived at a floor:
+	inUse = false;
+	lookInQueue()
+	
+			
+revised actionEvent() //(again)
+	if dropOffOrPickUpTimer
+		closeDoors
+		inUse = false;
+		lookInQueue()
+		
+		
+		
+
+
+
+----------------------------------------------------------------------------------
+
+
+floor button pressed:
+light up floor button
+add floor to same queue as current direction
+lookInQueue()
+	
+				
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+#########################################################################
+	
+10 SECOND TIMER NOTES
+
+
+//General Summary
+
+		if(button pressed inside elevator)
+			close door
+			travel to all floors pressed in elevator (first the ones in destinationPassengerDirection)
+				//open doors at each floor for exactly 5 seconds 
+				//change floor button color
+			only pick up passengers on the way if stopFloorDirection == currentDirection
+				//change arrow key color
+				//open doors for exactly 5 seconds
+			once all is done:  lookInQueue()
+		else
+			if button pressed in next 5 seconds
+				do above instructions
+			else (no button pressed inside elevator in 10 secs total)
+				close door
+				lookInQueue()	
+
+------------------------------------------------------------
+
+//actionEvent when we reach a floor
+for every int passenger in currentDirection queue
+		if passenger == currentFloor
+			openDoors
+			stop travelUp/travelDown timer
+			if floorButton[floor] is lit up
+				set button color back to normal
+			if arrowButton[floor] of the direction we're traveling is lit up
+				set button color back to normal
+				if no floor buttons are lit up
+					fiveSecondPickUpTimerHasRung = false;
+					floorButtonSelectedAfterWaitingForElevator = false
+					call pickUpTimerWithNoFloorsSelectedTimer //5 seconds
+					specialPickUpTimerCalled = true
+			if !specialPickUpTimerCalled
+				call dropOffOrPickUpTimer //5 seconds
+		
+----------------------------------------------------------		
+
+//actionevent timer
+	else if pickUpTimerWithNoFloorsSelectedTimer
+		if(floorButtonSelectedAfterWaitingForElevator)
+			closeDoors
+			moveToFloor(floorToTravel)
+			return
+		if (fiveSecondPickUpTimerHasRung)
+			close door
+			inUse = false;
+			lookInQueue()
+		else
+			fiveSecondPickUpTimerHasRung = true;
+			call pickUpTimerWithNoFloorsSelectedTimer //5 seconds

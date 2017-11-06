@@ -6,4 +6,4 @@ Requirements and Architectural Design documents located in "formal documents" fo
 
 **For program execution, run the ElevatorSimulator.jar executable located in the main directory**
 
-(Note: this project was written for the Software Engineering Principles course at UW-La Crosse)
+*Note: this project was written for the Software Engineering Principles course at UW-La Crosse*
